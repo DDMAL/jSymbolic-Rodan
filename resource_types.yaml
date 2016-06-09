@@ -20,13 +20,14 @@
   extension: arff
   description: WEKA ARFF
 
-- mimetype: application/csv
+- mimetype: application/arff+csv
   extension: csv
   description: WEKA ARFF CSV
 
 #######################################################################################
 # Configuration file types
+# jsc = jSymbolic
 #######################################################################################
-- mimetype: application/txt
+- mimetype: application/jsc+txt
   extension: txt
   description: jSymbolic Configuration Text File
