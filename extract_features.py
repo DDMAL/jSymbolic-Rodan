@@ -93,8 +93,7 @@ class extract_features(RodanTask):
         # TODO What to do with the error output from jSymbolic?
         # Return if jsymbolic experienced an error so no further file processing is done
         if stderr:
-            sys.stderr.write(stderr)
-            return return_value
+            raise Exception(stderr)
 
         # Split up filename and extension for arff and csv files
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
