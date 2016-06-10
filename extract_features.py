@@ -96,12 +96,13 @@ class extract_features(RodanTask):
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
 
         # Try to get arff file if it exists, otherwise continue
-        arff_name = "{0}.arff".format(pre)
-        outputs['jSymbolic ARFF Output'][0]['resource_path'] = arff_name
+        src_arff_file_path = "{0}.arff".format(pre)
+        jsymbolic_utilities.copy_when_exists(src_arff_file_path, outputs['jSymbolic ARFF Output'][0]['resource_path'])
 
         # Try to get csv file if it exists, otherwise continue
-        csv_name = "{0}.csv".format(pre)
-        outputs['jSymbolic ARFF CSV Output'][0]['resource_path'] = csv_name
+        src_csv_file_path = "{0}.csv".format(pre)
+        jsymbolic_utilities.copy_when_exists(src_csv_file_path,
+                                             outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
 
         return return_value
 
