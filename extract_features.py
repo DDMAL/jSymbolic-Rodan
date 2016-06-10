@@ -63,8 +63,10 @@ class extract_features(RodanTask):
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
 
         config_file = None
-        if inputs['jSymbolic Configuration File Input'][0]['resource_path']:
+        try:
             config_file = inputs['jSymbolic Configuration File Input'][0]['resource_path']
+        except:
+            pass
 
         java_home = os.environ.get("JAVA_HOME")
         java_jar = "jre/lib/ext/"
