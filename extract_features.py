@@ -1,5 +1,8 @@
 import os
 import shutil
+
+import sys
+
 import jsymbolic_utilities
 
 from rodan.jobs.base import RodanTask
@@ -90,6 +93,7 @@ class extract_features(RodanTask):
         # TODO What to do with the error output from jSymbolic?
         # Return if jsymbolic experienced an error so no further file processing is done
         if stderr:
+            print >> sys.stderr, stderr
             return return_value
 
         # Split up filename and extension for arff and csv files
