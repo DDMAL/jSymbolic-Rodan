@@ -3,6 +3,7 @@ import shutil
 import jsymbolic_utilities
 
 from rodan.jobs.base import RodanTask
+from django.conf import settings
 
 
 class extract_features(RodanTask):
@@ -68,9 +69,8 @@ class extract_features(RodanTask):
         except:
             pass
 
-        java_home = os.environ.get("JAVA_HOME")
-        java_jar = "jre/lib/ext/"
-        java_directory = os.path.join(java_home, java_jar)
+        # Get the path of the jsymbolic jar on the system
+        java_directory = settings.JSYMBOLIC_JAR
         base_name = os.path.basename(music_file)
         music_name, ext = os.path.splitext(base_name)
         value_file_name = music_name + "_jSymbolic_feature_values.xml"
