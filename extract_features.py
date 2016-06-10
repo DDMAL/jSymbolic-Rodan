@@ -91,23 +91,17 @@ class extract_features(RodanTask):
         # Return if jsymbolic experienced an error so no further file processing is done
         if stderr:
             return return_value
-        '''
-        # Split up filename and extension for arff and csv files
-        pre, ext = os.path.splitext(value_file_name)
 
+        # Split up filename and extension for arff and csv files
+        pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
 
         # Try to get arff file if it exists, otherwise continue
         arff_name = "{0}.arff".format(pre)
-        src_arff_file_path = os.path.join(temp_dir, arff_name)
-        jsymbolic_utilities.copy_when_exists(src_arff_file_path,
-                                             outputs['jSymbolic ARFF Output'][0]['resource_path'])
+        outputs['jSymbolic ARFF Output'][0]['resource_path'] = arff_name
 
         # Try to get csv file if it exists, otherwise continue
         csv_name = "{0}.csv".format(pre)
-        src_csv_file_path = os.path.join(temp_dir, csv_name)
-        jsymbolic_utilities.copy_when_exists(src_csv_file_path,
-                                             outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
-        '''
+        outputs['jSymbolic ARFF CSV Output'][0]['resource_path'] = csv_name
 
         return return_value
 
