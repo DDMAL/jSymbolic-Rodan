@@ -82,7 +82,7 @@ class extract_features(RodanTask):
                             outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
             return_value, stdout, stderr = jsymbolic_utilities.execute(config_input, java_directory)
         else:
-            default_input = ['java', '-jar', 'jSymbolic.jar', music_file,
+            default_input = ['java', '-jar', 'jSymbolic.jar', '-csv', '-arff', music_file,
                              outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
                              outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
             return_value, stdout, stderr = jsymbolic_utilities.execute(default_input, java_directory)
@@ -95,14 +95,21 @@ class extract_features(RodanTask):
         # Split up filename and extension for arff and csv files
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
 
-        # Try to get arff file if it exists, otherwise continue
-        src_arff_file_path = "{0}.arff".format(pre)
-        jsymbolic_utilities.copy_when_exists(src_arff_file_path, outputs['jSymbolic ARFF Output'][0]['resource_path'])
+        try:
+            # Try to get arff file if it exists, otherwise continue
+            src_arff_file_path = "{0}.arff".format(pre)
+            jsymbolic_utilities.copy_when_exists(src_arff_file_path,
+                                                 outputs['jSymbolic ARFF Output'][0]['resource_path'])
+        except:
+            pass
 
-        # Try to get csv file if it exists, otherwise continue
-        src_csv_file_path = "{0}.csv".format(pre)
-        jsymbolic_utilities.copy_when_exists(src_csv_file_path,
-                                             outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
+        try:
+            # Try to get csv file if it exists, otherwise continue
+            src_csv_file_path = "{0}.csv".format(pre)
+            jsymbolic_utilities.copy_when_exists(src_csv_file_path,
+                                                 outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
+        except:
+            pass
 
         return return_value
 
