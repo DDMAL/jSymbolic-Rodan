@@ -63,7 +63,9 @@ class extract_features(RodanTask):
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
         config_file = inputs['jSymbolic Configuration File Input'][0]['resource_path']
 
-        java_directory = '/workspace/ddmal/jSymbolic/out/artifacts/jSymbolic_jar/'
+        java_home = os.environ.get("JAVA_HOME")
+        java_jar = "jre/lib/ext/"
+        java_directory = os.path.join(java_home, java_jar)
         base_name = os.path.basename(music_file)
         music_name, ext = os.path.splitext(base_name)
         value_file_name = music_name + "_jSymbolic_feature_values.xml"
