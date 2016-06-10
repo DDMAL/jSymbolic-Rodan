@@ -60,7 +60,7 @@ class extract_features(RodanTask):
         },
     )
 
-    def run_my_task(self, inputs, settings, outputs):
+    def run_my_task(self, inputs, job_settings, outputs):
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
 
         config_file = None
