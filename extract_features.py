@@ -67,6 +67,7 @@ class extract_features(RodanTask):
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
 
         config_file_path = None
+        stderr_valid = None
         try:
             config_file_path = inputs['jSymbolic Configuration File Input'][0]['resource_path']
             config_validate_input = ['java', '-jar', 'jSymbolic.jar', '-validateconfigfeatureoption', config_file_path]
