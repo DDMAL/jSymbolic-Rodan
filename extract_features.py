@@ -81,16 +81,15 @@ class extract_features(RodanTask):
             self.my_error_information(None, stderr_valid)
             return False
 
-        # If everything is valid in configuration file, then make sure CSV and ARFF are true
-        # if they are not, then force to be false to accommodate Rodan output ports
-        csv_false = 'convert_to_csv=false'
-        csv_true = 'convert_to_csv=true'
-        arff_false = 'convert_to_arff=false'
-        arff_true = 'convert_to_arff=true'
-        jsymbolic_utilities.replace(config_file_path, csv_false, csv_true)
-        jsymbolic_utilities.replace(config_file_path, arff_false, arff_true)
-
         if config_file_path:
+            # If everything is valid in configuration file, then make sure CSV and ARFF are true
+            # if they are not, then force to be false to accommodate Rodan output ports
+            csv_false = 'convert_to_csv=false'
+            csv_true = 'convert_to_csv=true'
+            arff_false = 'convert_to_arff=false'
+            arff_true = 'convert_to_arff=true'
+            jsymbolic_utilities.replace(config_file_path, csv_false, csv_true)
+            jsymbolic_utilities.replace(config_file_path, arff_false, arff_true)
             config_input = ['java', '-jar', 'jSymbolic.jar', '-configrun', config_file_path, music_file,
                             outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
                             outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
