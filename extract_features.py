@@ -1,12 +1,9 @@
 import os
-import shutil
-
-import sys
-
 import jsymbolic_utilities
 
 from rodan.jobs.base import RodanTask
 from django.conf import settings
+from music21 import *
 
 
 class extract_features(RodanTask):
@@ -64,23 +61,36 @@ class extract_features(RodanTask):
     )
 
     def run_my_task(self, inputs, job_settings, outputs):
+        # Get the path of the jsymbolic jar on the system
+        java_directory = settings.JSYMBOLIC_JAR
+
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
 
-        config_file = None
+        config_file_path = None
         try:
-            config_file = inputs['jSymbolic Configuration File Input'][0]['resource_path']
+            config_file_path = inputs['jSymbolic Configuration File Input'][0]['resource_path']
+            config_validate_input = ['java', '-jar', 'jSymbolic.jar', '-validateconfigfeatureoption', config_file_path]
+            return_valid, stdout_valid, stderr_valid = jsymbolic_utilities.execute(config_validate_input,
+                                                                                   java_directory)
         except:
             pass
 
-        # Get the path of the jsymbolic jar on the system
-        java_directory = settings.JSYMBOLIC_JAR
-        base_name = os.path.basename(music_file)
-        music_name, ext = os.path.splitext(base_name)
-        value_file_name = music_name + "_jSymbolic_feature_values.xml"
-        definition_file_name = music_name + "_jSymbolic_feature_definitions.xml"
+        # If configuration file is not valid then output the standard error to the user
+        if stderr_valid:
+            self.my_error_information(None, stderr_valid)
+            return False
 
-        if config_file:
-            config_input = ['java', '-jar', 'jSymbolic.jar', '-configrun', config_file, music_file,
+        # If everything is valid in configuration file, then make sure CSV and ARFF are true
+        # if they are not, then force to be false to accommodate Rodan output ports
+        csv_false = 'convert_to_csv=false'
+        csv_true = 'convert_to_csv=true'
+        arff_false = 'convert_to_arff=false'
+        arff_true = 'convert_to_arff=true'
+        jsymbolic_utilities.replace(config_file_path, csv_false, csv_true)
+        jsymbolic_utilities.replace(config_file_path, arff_false, arff_true)
+
+        if config_file_path:
+            config_input = ['java', '-jar', 'jSymbolic.jar', '-configrun', config_file_path, music_file,
                             outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
                             outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
             return_value, stdout, stderr = jsymbolic_utilities.execute(config_input, java_directory)
@@ -93,7 +103,8 @@ class extract_features(RodanTask):
         # TODO What to do with the error output from jSymbolic?
         # Return if jsymbolic experienced an error so no further file processing is done
         if stderr:
-            raise Exception(stderr)
+            self.my_error_information(None, stderr)
+            return False
 
         # Split up filename and extension for arff and csv files
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
@@ -119,3 +130,9 @@ class extract_features(RodanTask):
     def test_my_task(self, testcase):
         # No tests for now
         pass
+
+    # TODO implement this maybe to output error as a traceback
+    # TODO this might work now but it double check with Ryan on Rodan client
+    # TODO should either return traceback or exc (Exception) in error_details
+    def my_error_information(self, exc, traceback):
+        return {'error_summary': 'jSymbolic Standard Error', 'error_details': traceback}
