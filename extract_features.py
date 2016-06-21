@@ -3,6 +3,7 @@ import jsymbolic_utilities
 
 from rodan.jobs.base import RodanTask
 from django.conf import settings
+from tempfile import mkstemp
 from music21 import *
 
 
@@ -67,9 +68,9 @@ class extract_features(RodanTask):
         music_file_type = inputs['jSymbolic Music File Input'][0]['resource_type']
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
         if music_file_type == 'application/x-musicxml+xml':
-            pre_music, ext_music = os.path.splitext(inputs['jSymbolic Music File Input'][0]['resource_path'])
-            music_file = "{0}.midi".format(pre_music)
-            sc = converter.parse(music_file)
+            fh, abs_path = mkstemp()
+            music_file = os.path.join(abs_path, '.midi')
+            sc = converter.parse(inputs['jSymbolic Music File Input'][0]['resource_path'])
             sc.write('midi', music_file)
 
         config_file_path = None
