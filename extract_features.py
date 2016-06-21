@@ -20,7 +20,7 @@ class extract_features(RodanTask):
             'name': 'jSymbolic Music File Input',
             'minimum': 1,
             'maximum': 1,
-            'resource_types': ['application/mei+xml', 'application/midi', 'application/musicxml+xml']
+            'resource_types': ['application/mei+xml', 'application/midi', 'application/x-musicxml+xml']
         },
 
         {
@@ -66,7 +66,7 @@ class extract_features(RodanTask):
 
         music_file_type = inputs['jSymbolic Music File Input'][0]['resource_type']
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
-        if music_file_type == 'application/musicxml+xml':
+        if music_file_type == 'application/x-musicxml+xml':
             pre_music, ext_music = os.path.splitext(inputs['jSymbolic Music File Input'][0]['resource_path'])
             music_file = "{0}.midi".format(pre_music)
             sc = converter.parse(music_file)
