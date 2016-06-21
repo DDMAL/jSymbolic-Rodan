@@ -9,6 +9,10 @@
   extension: midi
   description: Musical Instrumental Digital Interface
 
+- mimetype: application/musicxml+xml
+  extension: xml
+  description: MusicXML
+
 #######################################################################################
 # ACE types
 #######################################################################################

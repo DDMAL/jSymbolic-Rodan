@@ -20,7 +20,7 @@ class extract_features(RodanTask):
             'name': 'jSymbolic Music File Input',
             'minimum': 1,
             'maximum': 1,
-            'resource_types': ['application/mei+xml', 'application/midi']
+            'resource_types': ['application/mei+xml', 'application/midi', 'application/musicxml+xml']
         },
 
         {
@@ -64,7 +64,13 @@ class extract_features(RodanTask):
         # Get the path of the jsymbolic jar on the system
         java_directory = settings.JSYMBOLIC_JAR
 
+        music_file_type = inputs['jSymbolic Music File Input'][0]['resource_type']
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
+        if music_file_type == 'application/musicxml+xml':
+            pre_music, ext_music = os.path.splitext(inputs['jSymbolic Music File Input'][0]['resource_path'])
+            music_file = "{0}.midi".format(pre_music)
+            sc = converter.parse(music_file)
+            sc.write('midi', music_file)
 
         config_file_path = None
         stderr_valid = None
@@ -90,11 +96,13 @@ class extract_features(RodanTask):
             arff_true = 'convert_to_arff=true'
             jsymbolic_utilities.replace(config_file_path, csv_false, csv_true)
             jsymbolic_utilities.replace(config_file_path, arff_false, arff_true)
+            # Run jsymbolic using the specified configuration file
             config_input = ['java', '-jar', 'jSymbolic.jar', '-configrun', config_file_path, music_file,
                             outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
                             outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
             return_value, stdout, stderr = jsymbolic_utilities.execute(config_input, java_directory)
         else:
+            # Run jsymbolic default
             default_input = ['java', '-jar', 'jSymbolic.jar', '-csv', '-arff', music_file,
                              outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
                              outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
