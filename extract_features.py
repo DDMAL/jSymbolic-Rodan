@@ -1,9 +1,12 @@
 import os
+
+import shutil
+
 import jsymbolic_utilities
 
 from rodan.jobs.base import RodanTask
 from django.conf import settings
-from tempfile import mkstemp
+from tempfile import mkdtemp
 from music21 import *
 
 
@@ -45,7 +48,7 @@ class extract_features(RodanTask):
             'maximum': 1,
             'resource_types': ['application/ace+xml']
         },
-
+        # TODO output config file
         {
             'name': 'jSymbolic ARFF Output',
             'minimum': 0,
@@ -67,9 +70,10 @@ class extract_features(RodanTask):
 
         music_file_type = inputs['jSymbolic Music File Input'][0]['resource_type']
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
+        abs_path = None
         if music_file_type == 'application/x-musicxml+xml':
-            fh, abs_path = mkstemp()
-            music_file = os.path.join(abs_path, '.midi')
+            abs_path = mkdtemp()
+            music_file = os.path.join(abs_path, 'temp.midi')
             sc = converter.parse(inputs['jSymbolic Music File Input'][0]['resource_path'])
             sc.write('midi', music_file)
 
@@ -133,6 +137,9 @@ class extract_features(RodanTask):
                                                  outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
         except:
             pass
+
+        if abs_path:
+            shutil.rmtree(abs_path)
 
         return return_value
 
