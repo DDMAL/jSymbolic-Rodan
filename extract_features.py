@@ -24,6 +24,7 @@ class extract_features(RodanTask):
             'name': 'jSymbolic Music File Input',
             'minimum': 1,
             'maximum': 1,
+            # Note that musicXML resource is from the Rodan musicXML format and not specified in resource_types.yaml
             'resource_types': ['application/mei+xml', 'application/midi', 'application/x-musicxml+xml']
         },
 
@@ -48,7 +49,15 @@ class extract_features(RodanTask):
             'maximum': 1,
             'resource_types': ['application/ace+xml']
         },
-        # TODO output config file
+
+        {
+            'name': 'jSymbolic Configuration File Output',
+            'minimum': 0,
+            'maximum': 1,
+            'resource_types': ['application/jsc+txt']
+
+        },
+
         {
             'name': 'jSymbolic ARFF Output',
             'minimum': 0,
@@ -72,6 +81,7 @@ class extract_features(RodanTask):
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
         abs_path = None
         if music_file_type == 'application/x-musicxml+xml':
+            # If we have a musicXML file type, then convert to temp MIDI file for jSymbolic use
             abs_path = mkdtemp()
             music_file = os.path.join(abs_path, 'temp.midi')
             sc = converter.parse(inputs['jSymbolic Music File Input'][0]['resource_path'])
@@ -80,6 +90,7 @@ class extract_features(RodanTask):
         config_file_path = None
         stderr_valid = None
         try:
+            # Validate the configuration file
             config_file_path = inputs['jSymbolic Configuration File Input'][0]['resource_path']
             config_validate_input = ['java', '-jar', 'jSymbolic.jar', '-validateconfigfeatureoption', config_file_path]
             return_valid, stdout_valid, stderr_valid = jsymbolic_utilities.execute(config_validate_input,
@@ -122,22 +133,20 @@ class extract_features(RodanTask):
         # Split up filename and extension for arff and csv files
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
 
-        try:
-            # Try to get arff file if it exists, otherwise continue
-            src_arff_file_path = "{0}.arff".format(pre)
-            jsymbolic_utilities.copy_when_exists(src_arff_file_path,
-                                                 outputs['jSymbolic ARFF Output'][0]['resource_path'])
-        except:
-            pass
+        src_arff_file_path = "{0}.arff".format(pre)
+        jsymbolic_utilities.copy_when_exists(src_arff_file_path,
+                                             outputs['jSymbolic ARFF Output'][0]['resource_path'])
 
-        try:
-            # Try to get csv file if it exists, otherwise continue
-            src_csv_file_path = "{0}.csv".format(pre)
-            jsymbolic_utilities.copy_when_exists(src_csv_file_path,
-                                                 outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
-        except:
-            pass
+        # Try to get csv file if it exists, otherwise continue
+        src_csv_file_path = "{0}.csv".format(pre)
+        jsymbolic_utilities.copy_when_exists(src_csv_file_path,
+                                             outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
 
+        # Try to copy configuration file to output if one was specified
+        jsymbolic_utilities.copy_when_exists(config_file_path,
+                                             outputs['jSymbolic Configuration File Output'][0]['resource_path'])
+
+        # Remove the temp directory for musicXML conversion
         if abs_path:
             shutil.rmtree(abs_path)
 
