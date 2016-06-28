@@ -89,14 +89,12 @@ class extract_features(RodanTask):
 
         config_file_path = None
         stderr_valid = None
-        try:
+        if inputs['jSymbolic Configuration File Input'][0]['resource_path'] is not None:
             # Validate the configuration file
             config_file_path = inputs['jSymbolic Configuration File Input'][0]['resource_path']
             config_validate_input = ['java', '-jar', 'jSymbolic.jar', '-validateconfigfeatureoption', config_file_path]
             return_valid, stdout_valid, stderr_valid = jsymbolic_utilities.execute(config_validate_input,
                                                                                    java_directory)
-        except:
-            pass
 
         # If configuration file is not valid then output the standard error to the user
         if stderr_valid:
