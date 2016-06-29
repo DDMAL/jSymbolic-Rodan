@@ -44,7 +44,7 @@ def execute(cmdArray, workingDir):
 
 
 def copy_when_exists(src, dst):
-    if os.path.isfile(src) and dst is not None:
+    if dst is not None and os.path.isfile(src):
         shutil.copyfile(src, dst)
 
 
