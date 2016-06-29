@@ -89,12 +89,15 @@ class extract_features(RodanTask):
 
         config_file_path = None
         stderr_valid = None
-        if inputs['jSymbolic Configuration File Input'][0]['resource_path'] is not None:
+        try:
             # Validate the configuration file
             config_file_path = inputs['jSymbolic Configuration File Input'][0]['resource_path']
             config_validate_input = ['java', '-jar', 'jSymbolic.jar', '-validateconfigfeatureoption', config_file_path]
             return_valid, stdout_valid, stderr_valid = jsymbolic_utilities.execute(config_validate_input,
                                                                                    java_directory)
+        except KeyError:
+            # Pass if the configuration file input port is not in fact there
+            pass
 
         # If configuration file is not valid then output the standard error to the user
         if stderr_valid:
@@ -131,18 +134,29 @@ class extract_features(RodanTask):
         # Split up filename and extension for arff and csv files
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
 
-        src_arff_file_path = "{0}.arff".format(pre)
-        jsymbolic_utilities.copy_when_exists(src_arff_file_path,
-                                             outputs['jSymbolic ARFF Output'][0]['resource_path'])
+        # Try to get arff file if it exists, otherwise continue
+        try:
+            src_arff_file_path = "{0}.arff".format(pre)
+            jsymbolic_utilities.copy_when_exists(src_arff_file_path,
+                                                outputs['jSymbolic ARFF Output'][0]['resource_path'])
+        except KeyError:
+            # Pass over if the output port is not in fact there
+            pass
 
         # Try to get csv file if it exists, otherwise continue
-        src_csv_file_path = "{0}.csv".format(pre)
-        jsymbolic_utilities.copy_when_exists(src_csv_file_path,
-                                             outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
+        try:
+            src_csv_file_path = "{0}.csv".format(pre)
+            jsymbolic_utilities.copy_when_exists(src_csv_file_path,
+                                                outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
+        except KeyError:
+            pass
 
         # Try to copy configuration file to output if one was specified
-        jsymbolic_utilities.copy_when_exists(config_file_path,
-                                             outputs['jSymbolic Configuration File Output'][0]['resource_path'])
+        try:
+            jsymbolic_utilities.copy_when_exists(config_file_path,
+                                                outputs['jSymbolic Configuration File Output'][0]['resource_path'])
+        except KeyError:
+            pass
 
         # Remove the temp directory for musicXML conversion
         if abs_path:
