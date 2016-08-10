@@ -101,8 +101,7 @@ class extract_features(RodanTask):
 
         # If configuration file is not valid then output the standard error to the user
         if stderr_valid:
-            self.my_error_information(None, stderr_valid)
-            return False
+            raise Exception(stderr_valid)
 
         if config_file_path:
             # If everything is valid in configuration file, then make sure CSV and ARFF are true
@@ -128,8 +127,7 @@ class extract_features(RodanTask):
         # TODO What to do with the error output from jSymbolic?
         # Return if jsymbolic experienced an error so no further file processing is done
         if stderr:
-            self.my_error_information(None, stderr)
-            return False
+            raise Exception(stderr)
 
         # Split up filename and extension for arff and csv files
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
