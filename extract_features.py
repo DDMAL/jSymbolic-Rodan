@@ -89,15 +89,12 @@ class extract_features(RodanTask):
 
         config_file_path = None
         stderr_valid = None
-        try:
+        if 'jSymbolic Configuration File Input' in inputs:
             # Validate the configuration file
             config_file_path = inputs['jSymbolic Configuration File Input'][0]['resource_path']
             config_validate_input = ['java', '-jar', 'jSymbolic.jar', '-validateconfigfeatureoption', config_file_path]
             return_valid, stdout_valid, stderr_valid = jsymbolic_utilities.execute(config_validate_input,
                                                                                    java_directory)
-        except KeyError:
-            # Pass if the configuration file input port is not in fact there
-            pass
 
         # If configuration file is not valid then output the standard error to the user
         if stderr_valid:
@@ -105,13 +102,17 @@ class extract_features(RodanTask):
 
         if config_file_path:
             # If everything is valid in configuration file, then make sure CSV and ARFF are true
-            # if they are not, then force to be false to accommodate Rodan output ports
-            csv_false = 'convert_to_csv=false'
-            csv_true = 'convert_to_csv=true'
-            arff_false = 'convert_to_arff=false'
-            arff_true = 'convert_to_arff=true'
-            jsymbolic_utilities.replace(config_file_path, csv_false, csv_true)
-            jsymbolic_utilities.replace(config_file_path, arff_false, arff_true)
+            # if they are not, then force to be true to accommodate Rodan output ports
+            if 'jSymbolic ARFF Output' in outputs:
+                arff_false = 'convert_to_arff=false'
+                arff_true = 'convert_to_arff=true'
+                jsymbolic_utilities.replace(config_file_path, arff_false, arff_true)
+
+            if 'jSymbolic ARFF CSV Output' in outputs:
+                csv_false = 'convert_to_csv=false'
+                csv_true = 'convert_to_csv=true'
+                jsymbolic_utilities.replace(config_file_path, csv_false, csv_true)
+
             # Run jsymbolic using the specified configuration file
             config_input = ['java', '-jar', 'jSymbolic.jar', '-configrun', config_file_path, music_file,
                             outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
@@ -124,7 +125,6 @@ class extract_features(RodanTask):
                              outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
             return_value, stdout, stderr = jsymbolic_utilities.execute(default_input, java_directory)
 
-        # TODO What to do with the error output from jSymbolic?
         # Return if jsymbolic experienced an error so no further file processing is done
         if stderr:
             raise Exception(stderr)
@@ -133,28 +133,21 @@ class extract_features(RodanTask):
         pre, ext = os.path.splitext(outputs['jSymbolic ACE XML Value Output'][0]['resource_path'])
 
         # Try to get arff file if it exists, otherwise continue
-        try:
+        if 'jSymbolic ARFF Output' in outputs:
             src_arff_file_path = "{0}.arff".format(pre)
             jsymbolic_utilities.copy_when_exists(src_arff_file_path,
                                                 outputs['jSymbolic ARFF Output'][0]['resource_path'])
-        except KeyError:
-            # Pass over if the output port is not in fact there
-            pass
 
         # Try to get csv file if it exists, otherwise continue
-        try:
+        if 'jSymbolic ARFF CSV Output' in outputs:
             src_csv_file_path = "{0}.csv".format(pre)
             jsymbolic_utilities.copy_when_exists(src_csv_file_path,
                                                 outputs['jSymbolic ARFF CSV Output'][0]['resource_path'])
-        except KeyError:
-            pass
 
         # Try to copy configuration file to output if one was specified
-        try:
+        if 'jSymbolic Configuration File Output' in outputs:
             jsymbolic_utilities.copy_when_exists(config_file_path,
                                                 outputs['jSymbolic Configuration File Output'][0]['resource_path'])
-        except KeyError:
-            pass
 
         # Remove the temp directory for musicXML conversion
         if abs_path:
@@ -166,8 +159,5 @@ class extract_features(RodanTask):
         # No tests for now
         pass
 
-    # TODO implement this maybe to output error as a traceback
-    # TODO this might work now but it double check with Ryan on Rodan client
-    # TODO should either return traceback or exc (Exception) in error_details
     def my_error_information(self, exc, traceback):
         return {'error_summary': 'jSymbolic Standard Error', 'error_details': traceback}
