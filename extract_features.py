@@ -76,6 +76,7 @@ class extract_features(RodanTask):
     def run_my_task(self, inputs, job_settings, outputs):
         # Get the path of the jsymbolic jar on the system
         java_directory = settings.JSYMBOLIC_JAR
+        jar_name = 'jSymbolic2.jar'
 
         music_file_type = inputs['jSymbolic Music File Input'][0]['resource_type']
         music_file = inputs['jSymbolic Music File Input'][0]['resource_path']
@@ -92,7 +93,7 @@ class extract_features(RodanTask):
         if 'jSymbolic Configuration File Input' in inputs:
             # Validate the configuration file
             config_file_path = inputs['jSymbolic Configuration File Input'][0]['resource_path']
-            config_validate_input = ['java', '-jar', 'jSymbolic.jar', '-validateconfigfeatureoption', config_file_path]
+            config_validate_input = ['java', '-jar', jar_name, '-validateconfigfeatureoption', config_file_path]
             return_valid, stdout_valid, stderr_valid = jsymbolic_utilities.execute(config_validate_input,
                                                                                    java_directory)
 
@@ -114,13 +115,13 @@ class extract_features(RodanTask):
                 jsymbolic_utilities.replace(config_file_path, csv_false, csv_true)
 
             # Run jsymbolic using the specified configuration file
-            config_input = ['java', '-jar', 'jSymbolic.jar', '-configrun', config_file_path, music_file,
+            config_input = ['java', '-jar', jar_name, '-configrun', config_file_path, music_file,
                             outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
                             outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
             return_value, stdout, stderr = jsymbolic_utilities.execute(config_input, java_directory)
         else:
             # Run jsymbolic default
-            default_input = ['java', '-jar', 'jSymbolic.jar', '-csv', '-arff', music_file,
+            default_input = ['java', '-jar', jar_name, '-csv', '-arff', music_file,
                              outputs['jSymbolic ACE XML Value Output'][0]['resource_path'],
                              outputs['jSymbolic ACE XML Definition Output'][0]['resource_path']]
             return_value, stdout, stderr = jsymbolic_utilities.execute(default_input, java_directory)
