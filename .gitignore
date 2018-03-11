@@ -2,3 +2,4 @@
 RunTest.py
 jSymbolic-Rodan.iml
 .gitignore
+*.pyc
